@@ -15,5 +15,9 @@
     "REST",
     "MVC"
   ],
-  "dependencies": {"utilities":"*","jake":"*"}
+  "dependencies": {
+    "utilities":"*",
+    "jake":"*",
+    "model":"*"
+  }
 }

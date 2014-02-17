@@ -1,2 +1,15 @@
-Put your generator docs in here.
-They will be displayed when calling the "help" task of your generator.
+Geddy MVC model generator.
+
+Generates a geddy model for you.
+
+Usage:
+
+    geddy gen model create[name,propertyA:datatype,propertyB:datatype,...]
+
+        name        Name of your model
+        -f --force  (optional) use to replace an existing model
+
+        properties  Properties are optional
+
+        datatype    The property datatype is optional and defaults to "string".
+                    Possible datatypes are: string, text, number, int, boolean, date, datetime, time, object
