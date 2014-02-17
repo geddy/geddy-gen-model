@@ -125,6 +125,10 @@ var _formatModelProperties = function (properties) {
   return obj;
 };
 
+function flagSet(shortName, name) {
+  return process.argv.indexOf(shortName) !== -1 && process.argv.indexOf(name);
+}
+
 // Tasks
 task('default', {async: true}, function() {
   var self = this;
@@ -146,6 +150,7 @@ task('create', {async: true}, function () {
     return;
   }
 
+  var force = flagSet('-f','--force');
   var name = args.shift();
   var properties = (args.length > 0) ? args : null;
 
@@ -163,12 +168,24 @@ task('create', {async: true}, function () {
     return;
   }
 
+  // sanitize the controller name
+  var modelFileName = name.toLowerCase().replace(/\s|-/g, '_');
+  var modelFilePath = path.join(modelsDir, modelFileName + '.js');
+
+  if (!force && fs.existsSync(modelFilePath)) {
+    fail('Model already exists. Use -f to replace it.');
+    return;
+  }
+
   var modelPath = path.join('template' ,'model.js');
 
   _writeTemplate(name, modelPath, modelsDir, {
     inflection: 'singular'
     , properties: props
   });
+
+  // Create model test scaffold
+  jake.Task.test.invoke(name);
 
   // Create the corresponding migration
   createTableTask = jake.Task['migration:createForTable'];
@@ -189,6 +206,15 @@ task('migration', {async: true}, function (name) {
     complete();
   });
   t.invoke.apply(t, arguments);
+});
+
+task('test', function (name) {
+  if (!name) {
+    throw new Error('No test name specified.');
+  }
+
+  _writeTemplate(name, path.join('template', 'test_model.js'), path.join('test', 'models'),
+    {inflection: 'singular'});
 });
 
 task('help', function() {
