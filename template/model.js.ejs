@@ -15,11 +15,15 @@ for (var i in properties) {
     propertyOutput.push(currentProperty);
   }
 }
-%>
+if (propertyOutput.length) {%>
   this.defineProperties({
-    <%- propertyOutput.join(",\n    "); %>
+    <%- propertyOutput.join(",\n    ").trim(); %>
   });
+<% } else { %>
+  this.defineProperties({
 
+  });
+<% } %>
 <% for(var i in properties) { -%>
 <% if(properties[i].name === 'id' && properties[i].type === 'int') { -%>
   this.autoIncrementId = true;
