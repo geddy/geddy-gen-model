@@ -6,6 +6,8 @@ var utils = require('utilities')
   , Adapter = require(path.join(geddyPath, 'lib/template/adapters')).Adapter
   , Migration = require('model').Migration;
 
+var appPath = process.cwd();
+
 namespace('migration', function () {
 
   var FILE_PAT = /\.js$/;
@@ -33,7 +35,7 @@ namespace('migration', function () {
         return filename;
       }
     , writeMigration = function (fn, templContent) {
-        var migrationDir = path.join('db', 'migrations')
+        var migrationDir = path.join(appPath, 'db', 'migrations')
           , filename = path.join(migrationDir, fn);
         utils.file.mkdirP(migrationDir);
         fs.writeFileSync(filename, templContent);

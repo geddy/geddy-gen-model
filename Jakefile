@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path')
+  , utilities = require('utilities')
   , geddyPath = path.normalize(path.join(require.resolve('geddy'), '../../'));
 
 // Load the basic Geddy toolkit
@@ -54,6 +55,9 @@ var _formatModelProperties = function (properties) {
 
   i = -1;
   while (++i < itemsArr.length) {
+    // ignore invalid property names
+    if (['_','-'].indexOf(itemsArr[i].charAt(0)) != -1) continue;
+
     value = itemsArr[i].split(':');
     name = utils.string.camelize(value.shift());
     type = value.shift() || '';
@@ -126,22 +130,18 @@ var _formatModelProperties = function (properties) {
 };
 
 function flagSet(shortName, name) {
-  return process.argv.indexOf(shortName) !== -1 && process.argv.indexOf(name);
+  return process.argv.indexOf(shortName) !== -1 || process.argv.indexOf(name) !== -1;
 }
 
 // Tasks
-task('default', {async: true}, function() {
+task('default', function() {
   var self = this;
   var t = jake.Task.create;
   t.reenable();
-  t.once('done', function() {
-    complete();
-    self.emit('done');
-  });
   t.invoke.apply(t, Array.prototype.slice.call(arguments));
 });
 
-task('create', {async: true}, function () {
+task('create', function () {
   var self = this;
   var args = Array.prototype.slice.call(arguments);
 
@@ -185,30 +185,26 @@ task('create', {async: true}, function () {
   });
 
   // Create model test scaffold
-  jake.Task.test.invoke(name);
+  jake.Task['create-test'].invoke(name);
+
+  // create db directory if not existing yet
+  jake.mkdirP(path.join(appPath, 'db'));
 
   // Create the corresponding migration
   createTableTask = jake.Task['migration:createForTable'];
-  createTableTask.on('complete', function () {
-    complete();
-    self.emit('done');
-  });
   createTableTask.invoke(name, props);
 });
 
 // Delegate to stuff in jakelib/migration.jake
-task('migration', {async: true}, function (name) {
+task('migration', function (name) {
   if (!name) {
     throw new Error('No migration name provided.');
   }
   var t = jake.Task['migration:create'];
-  t.on('complete', function () {
-    complete();
-  });
   t.invoke.apply(t, arguments);
 });
 
-task('test', function (name) {
+task('create-test', function (name) {
   if (!name) {
     throw new Error('No test name specified.');
   }
@@ -224,4 +220,31 @@ task('help', function() {
       {encoding: 'utf8'}
     )
   );
+});
+
+testTask('Model', ['clean', 'prepare-test-app'], function() {
+  this.testFiles.exclude('test/helpers/**');
+  this.testFiles.exclude('test/fixtures/**');
+  this.testFiles.exclude('test/geddy-test-app');
+  this.testFiles.exclude('test/tmp/**');
+  this.testFiles.include('test/**/*.js');
+});
+
+desc('Clears the test temp directory.');
+task('clean', function() {
+  console.log('Cleaning temp files ...');
+  var tmpDir = path.join(__dirname, 'test', 'tmp');
+  utilities.file.rmRf(tmpDir, {silent:true});
+  fs.mkdirSync(tmpDir);
+});
+
+desc('Copies the test app into the temp directory.');
+task('prepare-test-app', function() {
+  console.log('Preparing test app ...');
+  jake.cpR(
+    path.join(__dirname, 'test', 'geddy-test-app'),
+    path.join(__dirname, 'test', 'tmp'),
+    {silent: true}
+  );
+  console.log('Test app prepared.');
 });
