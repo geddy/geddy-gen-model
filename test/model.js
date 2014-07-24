@@ -41,8 +41,8 @@ function checkFile(name)
   migrationFiles.include(path.join(migrationsDir, '*_create_' + name +'.js'));
   migrationFiles = migrationFiles.toArray();
 
-  assert.equal(migrationFiles.length, 1);
-  filePath = migrationFiles[0];
+  assert.ok(migrationFiles.length > 0);
+  filePath = migrationFiles[migrationFiles.length - 1];
   assert.equal(fs.existsSync(filePath), true);
   assert.equal(fs.readFileSync(filePath, {encoding:'utf8'}), fs.readFileSync(path.join(__dirname, 'fixtures', 'migrations', 'create_' + name + '.js'), { encoding: 'utf8'}));
 }
