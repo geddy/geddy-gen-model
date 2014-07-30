@@ -7,6 +7,10 @@
   "scripts": {
     "test": "node_modules/jake/bin/cli.js test --trace"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/geddy/geddy-gen-model.git"
+  },
   "author": "",
   "keywords": [
     "geddy",
