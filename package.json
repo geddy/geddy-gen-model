@@ -5,7 +5,7 @@
   "description": "Experimental model generator for the geddy MVC framework.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/jake/bin/cli.js test --trace"
   },
   "author": "",
   "keywords": [
