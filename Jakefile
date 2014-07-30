@@ -1,41 +1,24 @@
-var fs = require('fs');
 var path = require('path')
+  , fs = require('fs')
+  , cwd = process.cwd()
   , utilities = require('utilities')
-  , geddyPath = path.normalize(path.join(require.resolve('geddy'), '../../'));
+  , genutils = require('geddy-genutils')
+  , genDirname = __dirname;
 
 // Load the basic Geddy toolkit
-require(path.join(geddyPath,'lib/geddy'));
-
-// Dependencies
-var cwd = process.cwd()
-  , utils = require(path.join(geddyPath, 'lib/utils'))
-  , Adapter = require(path.join(geddyPath, 'lib/template/adapters')).Adapter
-  , genDirname = __dirname;
+genutils.loadGeddy();
+var utils = genutils.loadGeddyUtils();
 
 var _writeTemplate = function (name, filename, dirname, opts) {
   var options = opts || {}
     , names = utils.string.getInflections(name)
-    , text = fs.readFileSync(path.join(genDirname, filename + '.ejs'), 'utf8').toString()
-    , bare = options.bare || false // Default to full controller
-    , adapter
-    , templContent
-    , fileDir
-    , filePath;
+    , bare = options.bare || false; // Default to full controller
 
-  // Render with the right model name
-  adapter = new Adapter({engine: 'ejs', template: text});
-  templContent = adapter.render({names: names, bare: bare, properties: options.properties});
-
-  // Write file
-  fileDir = dirname;
-  if (!utils.file.existsSync(fileDir)) {
-    fs.mkdirSync(fileDir);
-  }
-
-  filePath = path.join(fileDir, names.filename[options.inflection] + '.js');
-  fs.writeFileSync(filePath, templContent, 'utf8');
-
-  console.log('[Added] ' + filePath);
+  genutils.template.write(
+    path.join(genDirname, filename + '.ejs'),
+    path.join(dirname, names.filename[options.inflection] + '.js'),
+    {names: names, bare: bare, properties: options.properties}
+  );
 };
 
 var _formatModelProperties = function (properties) {
@@ -129,10 +112,6 @@ var _formatModelProperties = function (properties) {
   return obj;
 };
 
-function flagSet(shortName, name) {
-  return process.argv.indexOf(shortName) !== -1 || process.argv.indexOf(name) !== -1;
-}
-
 // Tasks
 task('default', function() {
   var self = this;
@@ -150,7 +129,7 @@ task('create', function () {
     return;
   }
 
-  var force = flagSet('-f','--force');
+  var force = genutils.flagSet('-f','--force');
   var name = args.shift();
   var properties = (args.length > 0) ? args : null;
 
