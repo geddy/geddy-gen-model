@@ -34,6 +34,11 @@ task('default', function() {
 
 namespace(ns, function() {
   task('create', function () {
+    if (!genutils.inAppRoot()) {
+      fail('You must run this generator from the root of your application.');
+      return;
+    }
+
     var self = this;
     var args = Array.prototype.slice.call(arguments);
 
@@ -55,10 +60,6 @@ namespace(ns, function() {
 
     var appPath = process.cwd();
     var modelsDir = path.join(appPath, 'app', 'models');
-    if (!fs.existsSync(modelsDir) || !fs.statSync(modelsDir).isDirectory()) {
-      fail('You must run this generator from the root of your application.');
-      return;
-    }
 
     // sanitize the controller name
     var modelFileName = name.toLowerCase().replace(/\s|-/g, '_');
