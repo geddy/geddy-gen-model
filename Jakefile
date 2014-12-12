@@ -62,7 +62,8 @@ namespace(ns, function() {
     var modelsDir = path.join(appPath, 'app', 'models');
 
     // sanitize the controller name
-    var modelFileName = name.toLowerCase().replace(/\s|-/g, '_');
+    var modelFileName = utilities.string.getInflection(name, 'filename', 'singular')
+                        .toLowerCase().replace(/\s|-/g, '_');
     var modelFilePath = path.join(modelsDir, modelFileName + '.js');
 
     if (!force && fs.existsSync(modelFilePath)) {
